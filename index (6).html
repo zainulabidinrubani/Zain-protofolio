@@ -1,0 +1,1714 @@
+<!--
+==============================================================================
+  PORTFOLIO — "SUPER MARIO" THEME  (single-file, vanilla HTML/CSS/JS)
+==============================================================================
+
+  HOW TO EDIT YOUR CONTENT
+  -----------------------
+  Scroll to the bottom of this file. Right below the
+  "EDIT YOUR CONTENT HERE" banner you will find these plain JS arrays:
+
+      const PROFILE      = { ... };   // your name / title / contact info
+      const PROJECTS     = [ ... ];   // one entry per "level" project card
+      const SKILLS       = [ ... ];   // one entry per power-up skill bar
+      const EXPERIENCE   = [ ... ];   // one entry per timeline checkpoint
+      const ACHIEVEMENTS = [ ... ];   // one entry per star / trophy
+
+  HOW TO ADD A NEW ITEM
+  ---------------------
+  • Project:     copy any object inside PROJECTS, paste, then change
+                  title / description / tech[] / demoUrl / codeUrl.
+  • Skill:       copy any object inside SKILLS, paste, then change
+                  name / level (0-100) / icon.
+                  icon options: "mushroom" | "fireflower" | "star" | "coin".
+  • Experience:  copy any object inside EXPERIENCE, paste, then change
+                  role / company / period / details.
+  • Achievement: copy any object inside ACHIEVEMENTS, paste, then change
+                  title / type / year.
+                  type options: "certification" | "award" | "publication".
+
+  Level / World numbers (World 1-1, 1-2 …) are AUTO-GENERATED from the
+  array index. Do NOT type them by hand. Adding an item to an array is
+  the ONLY step required — layout, numbering, animations and the HUD all
+  adapt automatically.
+
+  HOW TO CHANGE COLORS
+  --------------------
+  Open the :root block at the very top of the <style> section. Every
+  theme color is a CSS variable:
+
+      --sky-blue    background sky       (#5C94FC)
+      --mario-red   player / accents     (#E52521)
+      --mario-blue   player overalls     (#049CD8)
+      --mario-yellow question blocks     (#FBD000)
+      --mario-green  pipes / ground      (#43B047)
+      --mario-brown  bricks / ground      (#A0522D)
+      --ink          text color          (#0B0B0B)
+
+  The optional dark "underground" theme uses the .underground overrides
+  right below :root.
+
+  ACCESSIBILITY NOTES
+  -------------------
+  • All interactive elements have aria-labels.
+  • Keyboard navigation works everywhere (Tab + Enter / Space).
+  • prefers-reduced-motion disables drifting clouds, runner and bump.
+  • Mute toggle is keyboard-reachable.
+==============================================================================
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="AI & ML Engineer portfolio built in a classic Super Mario Bros 8-bit NES style." />
+<meta name="theme-color" content="#000000" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23FBD000'/%3E%3Crect x='1' y='1' width='14' height='14' fill='none' stroke='%23000' stroke-width='2'/%3E%3Ctext x='8' y='12' font-size='11' text-anchor='middle' font-family='monospace' font-weight='bold'%3E?%3C/text%3E%3C/svg%3E" />
+<title>Super Z — AI & ML Engineer Portfolio</title>
+
+<!-- Google Fonts: Press Start 2P (headings) + VT323 (body) -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet" />
+
+<style>
+/* ============================================================================
+   THEME TOKENS  — edit colors here
+   ========================================================================== */
+:root{
+  --sky-blue:    #5C94FC;
+  --sky-blue-2:  #4A7FE0;
+  --mario-red:   #E52521;
+  --mario-blue:  #049CD8;
+  --mario-yellow:#FBD000;
+  --mario-green: #43B047;
+  --mario-brown: #A0522D;
+  --brick-dark:  #6B3110;
+  --ink:         #0B0B0B;
+  --paper:       #FFFFFF;
+  --pipe-green-dk:#2E7D32;
+  --cloud:       #FFFFFF;
+  --hud-bg:       #000000;
+  --hud-line:    #FFFFFF;
+  --shadow-hard: rgba(0,0,0,0.85);
+  --tile: 16px;
+  --font-head:'Press Start 2P', monospace;
+  --font-body:'VT323', monospace;
+  --ground-h: 96px;
+  --hud-h:    56px;
+}
+
+/* Optional dark "underground level" theme — toggled by .underground on <body> */
+body.underground{
+  --sky-blue:    #000000;
+  --sky-blue-2:  #0B0B2B;
+  --mario-brown: #1E3A8A;
+  --brick-dark:  #0B1A4A;
+  --cloud:       #1E40AF;
+  --mario-green: #1E90FF;
+  --pipe-green-dk:#0B3D91;
+  --ink:         #E5E7EB;
+}
+
+/* ============================================================================
+   BASE
+   ========================================================================== */
+*{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0;
+  font-family:var(--font-body);
+  font-size:22px;                       /* VT323 reads small, scale up */
+  line-height:1.4;
+  color:var(--ink);
+  background:var(--sky-blue);
+  background:linear-gradient(180deg, var(--sky-blue) 0%, var(--sky-blue-2) 100%);
+  image-rendering:pixelated;
+  overflow-x:hidden;
+  transition:background .4s ease, color .4s ease;
+}
+h1,h2,h3,h4{ font-family:var(--font-head); font-weight:400; letter-spacing:1px; margin:0; }
+a{ color:inherit; text-decoration:none; }
+button{ font-family:var(--font-head); cursor:pointer; }
+img,svg{ image-rendering:pixelated; }
+
+/* Generic pixel border (8 hard sides, no rounded corners, hard shadow) */
+.pixel-border{
+  border:4px solid var(--ink);
+  box-shadow:
+     0 0 0 4px var(--paper) inset,
+     0 0 0 4px var(--ink)   inset,
+     8px 8px 0 var(--shadow-hard);
+  background:var(--paper);
+  image-rendering:pixelated;
+}
+.pixel-shadow{ box-shadow:8px 8px 0 var(--shadow-hard); }
+
+/* ============================================================================
+   HUD (sticky top bar)
+   ========================================================================== */
+#hud{
+  position:fixed; top:0; left:0; right:0; height:var(--hud-h);
+  background:var(--hud-bg);
+  color:var(--hud-line);
+  font-family:var(--font-head);
+  font-size:11px;
+  letter-spacing:1px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 14px;
+  border-bottom:4px solid #FFFFFF;
+  z-index:9999;
+  image-rendering:pixelated;
+}
+#hud .hud-cell{ display:flex; flex-direction:column; gap:4px; min-width:0; }
+#hud .hud-label{ color:#FBD000; font-size:9px; }
+#hud .hud-val{ color:#FFFFFF; font-size:12px; }
+#hud .hud-center{ text-align:center; }
+#hud .hud-right{ text-align:right; }
+#hud .coin-icon{ display:inline-block; width:14px; height:14px; vertical-align:middle; margin-right:4px; }
+
+#hud-controls{ position:fixed; top:calc(var(--hud-h) + 8px); right:8px; display:flex; gap:8px; z-index:9999; }
+.hud-btn{
+  font-family:var(--font-head); font-size:9px; padding:8px 10px;
+  background:#000; color:#FFF; border:2px solid #FFF;
+  box-shadow:4px 4px 0 var(--shadow-hard);
+}
+.hud-btn:hover{ background:var(--mario-yellow); color:#000; }
+.hud-btn[aria-pressed="true"]{ background:var(--mario-red); color:#FFF; }
+
+/* ============================================================================
+   DRIFTING CLOUDS + BUSHES (decorative)
+   ========================================================================== */
+.cloud-layer{
+  position:fixed; top:var(--hud-h); left:0; right:0; height:50vh;
+  pointer-events:none; z-index:1; overflow:hidden;
+}
+.cloud{
+  position:absolute; width:96px; height:32px; opacity:.95;
+  animation:drift linear infinite;
+}
+.cloud div{ position:absolute; background:var(--cloud); }
+/* cloud "shape" using 3 boxes */
+.cloud .c1{ left:0;  top:8px;  width:32px; height:24px; }
+.cloud .c2{ left:24px;top:0;   width:48px; height:32px; }
+.cloud .c3{ left:64px;top:8px; width:32px; height:24px; }
+@keyframes drift{
+  from{ transform:translateX(-160px); }
+  to  { transform:translateX(100vw); }
+}
+@media (prefers-reduced-motion: reduce){
+  .cloud{ animation:none; }
+}
+
+/* ============================================================================
+   GROUND (brick tiles bottom)
+   ========================================================================== */
+#ground{
+  position:fixed; bottom:0; left:0; right:0; height:var(--ground-h);
+  z-index:5; pointer-events:none;
+  background:
+    repeating-linear-gradient(90deg,
+      var(--mario-brown) 0 16px,
+      var(--brick-dark) 16px 18px,
+      var(--mario-brown) 18px 32px,
+      var(--brick-dark) 32px 34px,
+      var(--mario-brown) 34px 48px),
+    var(--mario-brown);
+  border-top:6px solid #000;
+  box-shadow:inset 0 6px 0 rgba(0,0,0,.25);
+}
+#ground::after{
+  content:""; position:absolute; left:0; right:0; top:6px; height:6px;
+  background:repeating-linear-gradient(90deg,
+    transparent 0 14px, rgba(0,0,0,.35) 14px 16px);
+}
+
+/* leave room for ground at the bottom of every section */
+section.world{ padding-bottom:calc(var(--ground-h) + 40px); }
+
+/* ============================================================================
+   MARIO RUNNER (CSS sprite)
+   ========================================================================== */
+#runner{
+  position:fixed; bottom:calc(var(--ground-h) - 6px); left:8%;
+  width:32px; height:32px; z-index:6; pointer-events:none;
+  transition:left .1s linear;
+}
+#runner .sprite{
+  width:32px; height:32px;
+  background:
+    /* simple Mario head+body using two stacked divs (no external image) */
+    linear-gradient(var(--mario-red),var(--mario-red)) 0 0/16px 16px no-repeat,
+    linear-gradient(var(--mario-blue),var(--mario-blue)) 0 16px/32px 16px no-repeat,
+    var(--mario-yellow);
+  position:relative;
+  image-rendering:pixelated;
+}
+/* cap + face details using box-shadows for pixel art feel */
+#runner .sprite::before{
+  content:""; position:absolute; left:0; top:0; width:32px; height:32px;
+  background:
+    /* hat brim */
+    linear-gradient(var(--mario-red),var(--mario-red)) 0 0/32px 6px no-repeat,
+    /* face skin */
+    linear-gradient(#FFCC99,#FFCC99) 4px 6px/24px 8px no-repeat,
+    /* mustache */
+    linear-gradient(#000000,#000000) 6px 14px/12px 2px no-repeat,
+    /* eye */
+    linear-gradient(#000000,#000000) 14px 8px/2px 4px no-repeat,
+    /* overalls strap */
+    linear-gradient(var(--mario-blue),var(--mario-blue)) 14px 14px/4px 8px no-repeat,
+    /* boots */
+    linear-gradient(#5A2A0A,#5A2A0A) 0 28px/14px 4px no-repeat,
+    linear-gradient(#5A2A0A,#5A2A0A) 18px 28px/14px 4px no-repeat;
+}
+#runner .sprite.animate-run{ animation:runstep .18s steps(2) infinite; }
+@keyframes runstep{
+  0%  { transform:translateY(0); }
+  50% { transform:translateY(-4px); }
+  100%{ transform:translateY(0); }
+}
+@media (prefers-reduced-motion: reduce){
+  #runner .sprite.animate-run{ animation:none; }
+}
+
+/* ============================================================================
+   SECTION SCAFFOLD
+   ========================================================================== */
+section.world{
+  position:relative; z-index:2;
+  padding:calc(var(--hud-h) + 40px) 24px 0;
+  min-height:100vh;
+  display:flex; flex-direction:column; align-items:center;
+}
+.world-header{ text-align:center; margin:24px 0 32px; }
+.world-header h2{
+  font-size:24px; color:#FFF;
+  text-shadow:4px 4px 0 var(--ink);
+  padding:12px 16px;
+  background:var(--mario-red);
+  border:4px solid var(--ink);
+  box-shadow:6px 6px 0 var(--shadow-hard);
+  display:inline-block;
+}
+.world-header .sub{ font-size:18px; color:var(--ink); margin-top:10px; }
+
+/* Warp pipe divider between worlds */
+.pipe-divider{
+  display:flex; justify-content:center; align-items:flex-end;
+  margin:0 0 24px; height:72px;
+}
+.pipe{
+  width:64px; height:72px; position:relative;
+  background:var(--mario-green);
+  border:4px solid var(--ink);
+  box-shadow:0 0 0 4px var(--pipe-green-dk) inset;
+}
+.pipe::before{
+  content:""; position:absolute; left:-8px; right:-8px; top:-8px;
+  height:24px; background:var(--mario-green);
+  border:4px solid var(--ink);
+  box-shadow:0 0 0 4px var(--pipe-green-dk) inset;
+}
+.pipe::after{
+  content:""; position:absolute; left:6px; top:24px; width:8px; height:40px;
+  background:#FFFFFF55;
+}
+
+/* ============================================================================
+   1. TITLE SCREEN (HERO)
+   ========================================================================== */
+#title-screen{
+  min-height:100vh; padding-top:calc(var(--hud-h) + 60px);
+  justify-content:center; text-align:center; gap:24px;
+}
+.logo{
+  font-family:var(--font-head);
+  font-size:clamp(28px, 6vw, 64px);
+  color:var(--mario-yellow);
+  letter-spacing:2px;
+  text-shadow:
+     4px 4px 0 var(--mario-red),
+     4px 4px 0 4px var(--ink),
+     -2px -2px 0 var(--mario-blue);
+  padding:8px 16px;
+  margin:0;
+}
+.logo .sub{
+  display:block; font-size:clamp(14px,2.4vw,22px);
+  color:#FFF; margin-top:18px;
+  text-shadow:3px 3px 0 var(--ink);
+}
+.tagline{
+  font-size:22px; color:var(--ink); max-width:640px; margin:0 auto;
+}
+.press-start{
+  font-family:var(--font-head); font-size:18px;
+  padding:16px 28px;
+  background:var(--mario-yellow);
+  color:var(--ink);
+  border:4px solid var(--ink);
+  box-shadow:6px 6px 0 var(--shadow-hard);
+  animation:blink 1.1s steps(2) infinite;
+}
+@keyframes blink{ 50%{ opacity:.35; } }
+@media (prefers-reduced-motion: reduce){ .press-start{ animation:none; } }
+
+/* hero coin row decoration */
+.hero-deco{ display:flex; gap:32px; justify-content:center; margin-top:24px; }
+.q-block{
+  width:56px; height:56px; background:var(--mario-yellow);
+  border:4px solid var(--ink);
+  box-shadow:
+    0 0 0 4px #C7A200 inset,
+    0 0 0 8px var(--mario-yellow) inset;
+  position:relative; cursor:pointer;
+  font-family:var(--font-head); font-size:18px; color:var(--ink);
+  display:flex; align-items:center; justify-content:center;
+}
+.q-block::after{
+  content:"?"; font-size:24px; text-shadow:2px 2px 0 #C7A200;
+}
+.q-block.bump{ animation:bump .3s ease; }
+@keyframes bump{
+  0%{ transform:translateY(0); }
+  50%{ transform:translateY(-18px); }
+  100%{ transform:translateY(0); }
+}
+@media (prefers-reduced-motion: reduce){ .q-block.bump{ animation:none; } }
+
+/* coin that pops from block */
+.coin-pop{
+  position:absolute; width:24px; height:24px;
+  background:var(--mario-yellow);
+  border:3px solid var(--ink);
+  border-radius:0;
+  pointer-events:none; z-index:50;
+  animation:coinFly .6s ease-out forwards;
+}
+@keyframes coinFly{
+  0%  { transform:translateY(0) scale(1); opacity:1; }
+  60% { transform:translateY(-50px) scale(1.1); opacity:1; }
+  100%{ transform:translateY(-90px) scale(.4); opacity:0; }
+}
+@media (prefers-reduced-motion: reduce){ .coin-pop{ animation:none; opacity:0; } }
+
+/* ============================================================================
+   2. ABOUT — Toad dialogue box
+   ========================================================================== */
+#about{ }
+.dialogue{
+  max-width:760px; background:#FFF; border:4px solid var(--ink);
+  box-shadow:8px 8px 0 var(--shadow-hard);
+  padding:24px; position:relative;
+  display:flex; gap:24px; align-items:flex-start;
+}
+.toad{
+  width:80px; height:80px; flex:0 0 80px; position:relative;
+  background:
+    /* cap (red/white mushroom top) */
+    radial-gradient(circle at 50% 35%, #FFF 0 14px, transparent 15px),
+    radial-gradient(circle at 50% 35%, var(--mario-red) 0 30px, transparent 31px),
+    var(--mario-red);
+  border:4px solid var(--ink);
+}
+.toad::after{
+  content:""; position:absolute; left:18px; bottom:8px; width:44px; height:32px;
+  background:
+    linear-gradient(#FFCC99,#FFCC99) 0 0/100% 100% no-repeat;
+  border:3px solid var(--ink);
+  box-shadow:
+    inset 0 0 0 4px #FFCC99,
+    6px 0 0 -2px #000,
+    -6px 0 0 -2px #000;
+}
+.dialogue-text{ flex:1; min-width:0; }
+.dialogue-caret{
+  content:""; position:absolute; left:60px; bottom:-16px;
+  width:0; height:0; border-left:16px solid transparent;
+  border-right:16px solid transparent; border-top:16px solid #FFF;
+  filter:drop-shadow(4px 4px 0 var(--ink));
+}
+.dialogue-name{
+  font-family:var(--font-head); font-size:12px;
+  color:var(--mario-red); margin-bottom:8px;
+}
+.typewriter{
+  font-size:24px; line-height:1.4; min-height:96px;
+  white-space:pre-wrap;
+}
+.cursor{
+  display:inline-block; width:10px; height:20px;
+  background:var(--ink); vertical-align:middle; margin-left:2px;
+  animation:cursorBlink 1s steps(2) infinite;
+}
+@keyframes cursorBlink{ 50%{ opacity:0; } }
+
+/* ============================================================================
+   3. SKILLS — power-ups + XP bars
+   ========================================================================== */
+#skills-grid{
+  display:grid; gap:24px; width:100%; max-width:960px;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+}
+.skill-card{
+  background:#FFF; border:4px solid var(--ink);
+  box-shadow:6px 6px 0 var(--shadow-hard);
+  padding:16px; display:flex; gap:16px; align-items:center;
+  transition:transform .15s ease;
+}
+.skill-card:hover{ transform:translateY(-6px); }
+.skill-powerup{
+  width:48px; height:48px; flex:0 0 48px; position:relative;
+  border:4px solid var(--ink);
+  box-shadow:4px 4px 0 var(--shadow-hard);
+}
+.skill-powerup.mushroom{ background:#FFF; }
+.skill-powerup.mushroom::before{
+  content:""; position:absolute; inset:0;
+  background:
+    radial-gradient(circle at 30% 30%, var(--mario-red) 0 8px, transparent 9px),
+    radial-gradient(circle at 70% 30%, var(--mario-red) 0 8px, transparent 9px),
+    radial-gradient(circle at 50% 70%, var(--mario-red) 0 14px, transparent 15px),
+    var(--mario-red);
+}
+.skill-powerup.fireflower{ background:var(--mario-yellow); }
+.skill-powerup.fireflower::before{
+  content:""; position:absolute; inset:4px;
+  background:
+    radial-gradient(circle at 50% 50%, #FFF 0 6px, transparent 7px),
+    radial-gradient(circle at 50% 30%, var(--mario-red) 0 6px, transparent 7px),
+    radial-gradient(circle at 30% 70%, var(--mario-blue) 0 5px, transparent 6px),
+    radial-gradient(circle at 70% 70%, var(--mario-blue) 0 5px, transparent 6px),
+    var(--mario-yellow);
+}
+.skill-powerup.star{ background:var(--mario-yellow); }
+.skill-powerup.star::before{
+  content:""; position:absolute; inset:4px;
+  clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+  background:var(--mario-yellow);
+}
+.skill-powerup.coin{ background:var(--mario-yellow); border-color:var(--ink); }
+.skill-powerup.coin::before{
+  content:""; position:absolute; inset:6px; background:var(--mario-yellow);
+  box-shadow:0 0 0 3px #C7A200 inset;
+}
+.skill-info{ flex:1; min-width:0; }
+.skill-name{ font-family:var(--font-head); font-size:12px; margin-bottom:8px; }
+.xp-track{
+  position:relative; height:20px; background:#000; border:3px solid var(--ink);
+  box-shadow:3px 3px 0 var(--shadow-hard);
+}
+.xp-fill{
+  position:absolute; left:0; top:0; bottom:0; width:0%;
+  background:repeating-linear-gradient(90deg,
+    var(--mario-green) 0 8px,
+    #2E7D32 8px 10px,
+    var(--mario-green) 10px 18px,
+    #2E7D32 18px 20px);
+  transition:width 1.2s cubic-bezier(.2,.8,.2,1);
+}
+.xp-text{
+  position:absolute; right:6px; top:1px; font-family:var(--font-head);
+  font-size:9px; color:#FFF; line-height:18px;
+}
+
+/* ============================================================================
+   4. PROJECTS — level-select tiles
+   ========================================================================== */
+#projects-grid{
+  display:grid; gap:24px; width:100%; max-width:1080px;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+}
+.project-card{
+  background:var(--mario-yellow);
+  border:4px solid var(--ink);
+  box-shadow:6px 6px 0 var(--shadow-hard);
+  padding:0; position:relative;
+  transition:transform .15s ease;
+  display:flex; flex-direction:column;
+}
+.project-card:hover{ transform:translateY(-10px); }
+.project-level{
+  font-family:var(--font-head); font-size:10px; color:var(--ink);
+  background:#000; color:#FFF; padding:6px 10px; margin:0;
+  border-bottom:4px solid var(--ink);
+  display:flex; justify-content:space-between; align-items:center;
+}
+.project-level .flag{
+  display:inline-block; width:14px; height:14px; background:var(--mario-green);
+  border:2px solid var(--ink);
+}
+.project-body{ padding:16px; flex:1; display:flex; flex-direction:column; gap:10px; }
+.project-title{ font-family:var(--font-head); font-size:14px; }
+.project-desc{ font-size:20px; color:var(--ink); }
+.project-tech{ display:flex; flex-wrap:wrap; gap:6px; }
+.tech-tag{
+  font-family:var(--font-head); font-size:9px;
+  background:#000; color:#FFF; padding:4px 6px;
+  border:2px solid var(--ink);
+  box-shadow:2px 2px 0 var(--shadow-hard);
+}
+.project-buttons{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+.btn-play, .btn-code{
+  font-family:var(--font-head); font-size:10px; padding:8px 10px;
+  border:3px solid var(--ink);
+  box-shadow:4px 4px 0 var(--shadow-hard);
+  display:inline-flex; align-items:center; gap:6px;
+}
+.btn-play{ background:var(--mario-green); color:#FFF; }
+.btn-code { background:#000; color:#FFF; }
+.btn-play:hover{ background:#2E7D32; }
+.btn-code:hover{ background:#222; }
+
+/* ============================================================================
+   5. EXPERIENCE — timeline
+   ========================================================================== */
+#experience-track{
+  position:relative; width:100%; max-width:760px;
+  padding:0 0 0 24px;
+}
+#experience-track::before{
+  content:""; position:absolute; left:36px; top:0; bottom:0; width:8px;
+  background:var(--mario-brown);
+  border:4px solid var(--ink);
+  box-shadow:inset 0 0 0 4px var(--brick-dark);
+}
+.exp-row{
+  position:relative; padding:0 0 24px 80px;
+}
+.exp-row::before{
+  content:""; position:absolute; left:18px; top:8px;
+  width:24px; height:24px; background:var(--mario-yellow);
+  border:4px solid var(--ink);
+  box-shadow:4px 4px 0 var(--shadow-hard), 0 0 0 4px var(--paper);
+}
+.exp-row .flag-pole{
+  position:absolute; left:32px; top:-8px; width:4px; height:24px;
+  background:var(--ink);
+}
+.exp-card{
+  background:#FFF; border:4px solid var(--ink);
+  box-shadow:6px 6px 0 var(--shadow-hard);
+  padding:16px; transition:transform .15s ease;
+}
+.exp-card:hover{ transform:translateX(6px); }
+.exp-role{ font-family:var(--font-head); font-size:14px; color:var(--mario-red); }
+.exp-company{ font-size:22px; }
+.exp-period{
+  font-family:var(--font-head); font-size:9px; background:#000; color:#FFF;
+  padding:4px 6px; display:inline-block; margin-bottom:8px;
+  border:2px solid var(--ink);
+}
+.exp-details{ font-size:20px; margin-top:8px; }
+
+/* ============================================================================
+   6. ACHIEVEMENTS — collectibles
+   ========================================================================== */
+#achievements-grid{
+  display:grid; gap:24px; width:100%; max-width:960px;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+}
+.ach-card{
+  background:#FFF; border:4px solid var(--ink);
+  box-shadow:6px 6px 0 var(--shadow-hard);
+  padding:16px; text-align:center;
+  transition:transform .15s ease;
+}
+.ach-card:hover{ transform:translateY(-6px) rotate(-2deg); }
+.ach-icon{
+  width:56px; height:56px; margin:0 auto 12px;
+  display:flex; align-items:center; justify-content:center;
+}
+.ach-icon.star{
+  background:var(--mario-yellow);
+  clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+}
+.ach-icon.trophy{
+  background:var(--mario-yellow);
+  border:4px solid var(--ink);
+  box-shadow:inset 0 0 0 4px #C7A200;
+  border-radius:0;
+  position:relative;
+}
+.ach-icon.trophy::before{
+  content:""; position:absolute; left:8px; right:8px; top:8px; bottom:24px;
+  background:var(--mario-yellow);
+  border:3px solid var(--ink);
+}
+.ach-icon.cert{
+  background:#FFF; border:4px solid var(--ink);
+  position:relative;
+}
+.ach-icon.cert::before{
+  content:"★"; position:absolute; inset:0; font-family:var(--font-head);
+  font-size:32px; color:var(--mario-red); display:flex; align-items:center; justify-content:center;
+}
+.ach-title{ font-family:var(--font-head); font-size:11px; }
+.ach-meta{ font-size:18px; margin-top:6px; }
+.ach-type{
+  font-family:var(--font-head); font-size:8px; background:#000; color:#FFF;
+  padding:3px 5px; display:inline-block; margin-top:8px; border:2px solid var(--ink);
+}
+
+/* ============================================================================
+   7. CONTACT — final castle
+   ========================================================================== */
+#contact{ text-align:center; }
+.castle{
+  width:280px; height:160px; margin:0 auto 24px; position:relative;
+  background:var(--mario-brown);
+  border:4px solid var(--ink);
+  box-shadow:6px 6px 0 var(--shadow-hard), inset 0 0 0 6px var(--brick-dark);
+}
+.castle::before{
+  content:""; position:absolute; left:50%; top:-30px; transform:translateX(-50%);
+  width:0; height:0;
+  border-left:20px solid transparent; border-right:20px solid transparent;
+  border-bottom:30px solid var(--mario-red);
+}
+.castle::after{
+  content:""; position:absolute; left:50%; bottom:0; transform:translateX(-50%);
+  width:48px; height:80px; background:#000;
+  border:4px solid var(--ink);
+}
+.contact-form{
+  max-width:560px; margin:0 auto; background:#FFF;
+  border:4px solid var(--ink); box-shadow:8px 8px 0 var(--shadow-hard);
+  padding:24px; text-align:left;
+}
+.field{ margin-bottom:16px; }
+.field label{
+  display:block; font-family:var(--font-head); font-size:10px; margin-bottom:6px; color:var(--mario-red);
+}
+.field input, .field textarea{
+  width:100%; font-family:var(--font-body); font-size:20px;
+  padding:8px 10px; background:#000; color:#0F0; border:3px solid var(--ink);
+  box-shadow:3px 3px 0 var(--shadow-hard); outline:none;
+}
+.field input:focus, .field textarea:focus{ background:#001A00; }
+.btn-submit{
+  font-family:var(--font-head); font-size:12px; padding:12px 18px;
+  background:var(--mario-green); color:#FFF;
+  border:4px solid var(--ink);
+  box-shadow:6px 6px 0 var(--shadow-hard);
+}
+.btn-submit:hover{ background:#2E7D32; }
+.social-row{ display:flex; gap:16px; justify-content:center; margin:24px 0 16px; flex-wrap:wrap; }
+.social-link{
+  display:flex; align-items:center; gap:8px; padding:10px 12px;
+  background:#000; color:#FFF; border:3px solid var(--ink);
+  box-shadow:4px 4px 0 var(--shadow-hard);
+  font-family:var(--font-head); font-size:9px;
+}
+.social-link:hover{ background:var(--mario-red); }
+.contact-finale{
+  font-family:var(--font-head); font-size:14px; color:#FFF;
+  background:var(--mario-red); border:4px solid var(--ink);
+  padding:16px; box-shadow:6px 6px 0 var(--shadow-hard);
+  max-width:680px; margin:24px auto 0; line-height:1.6;
+}
+
+/* ============================================================================
+   FOOTER (GAME OVER screen)
+   ========================================================================== */
+#gameover{
+  background:#000; color:#FFF;
+  padding:48px 24px calc(var(--ground-h) + 24px);
+  text-align:center; position:relative; z-index:2;
+  border-top:6px solid var(--ink);
+}
+.gameover-title{
+  font-family:var(--font-head); font-size:clamp(20px,4vw,32px);
+  color:var(--mario-red); text-shadow:3px 3px 0 #FFF;
+  margin-bottom:16px;
+}
+.gameover-sub{ font-size:22px; margin-bottom:24px; color:#FFF; }
+.btn-continue{
+  font-family:var(--font-head); font-size:14px; padding:14px 22px;
+  background:var(--mario-yellow); color:#000;
+  border:4px solid #FFF; box-shadow:6px 6px 0 var(--mario-red);
+}
+
+/* ============================================================================
+   STICKY NAVIGATION (game menu)
+   ========================================================================== */
+#nav-menu{
+  position:fixed; bottom:calc(var(--ground-h) + 12px); left:8px;
+  display:flex; gap:8px; z-index:50;
+  background:#000; border:3px solid #FFF; padding:6px;
+  box-shadow:4px 4px 0 var(--shadow-hard);
+  font-family:var(--font-head); font-size:9px;
+  flex-wrap:wrap; max-width:96vw;
+}
+#nav-menu button{
+  background:#000; color:#FFF; border:2px solid #FFF;
+  padding:6px 8px; font-size:9px; font-family:var(--font-head);
+}
+#nav-menu button:hover, #nav-menu button.active{
+  background:var(--mario-yellow); color:#000;
+}
+
+/* star-power rainbow overlay (Konami) */
+#star-power{
+  position:fixed; inset:0; pointer-events:none; z-index:9998;
+  background:linear-gradient(90deg,
+    #ff0000, #ff9800, #ffeb3b, #4caf50, #2196f3, #9c27b0);
+  opacity:0; mix-blend-mode:overlay;
+  transition:opacity .3s ease;
+}
+#star-power.on{ opacity:.7; animation:rainbow .5s steps(4) infinite; }
+@keyframes rainbow{ 0%{filter:hue-rotate(0deg);} 100%{filter:hue-rotate(360deg);} }
+
+/* responsive */
+@media (max-width:640px){
+  #hud{ font-size:9px; padding:0 8px; }
+  #hud .hud-val{ font-size:10px; }
+  .logo{ font-size:32px; }
+  .press-start{ font-size:14px; }
+  .dialogue{ flex-direction:column; align-items:center; text-align:center; }
+  .toad{ align-self:flex-start; }
+  #nav-menu{ display:none; }
+  #hud-controls{ flex-direction:column; }
+}
+
+/* ===================== ENHANCEMENTS ===================== */
+:focus-visible{ outline:4px solid var(--mario-yellow); outline-offset:3px; box-shadow:0 0 0 7px #000; }
+button:active,.btn-play:active,.btn-code:active,.social-link:active{ transform:translate(3px,3px); box-shadow:1px 1px 0 var(--shadow-hard); }
+section.world{ min-height:70vh; }
+#title-screen{ min-height:100vh; }
+.world-header h2{ font-size:clamp(14px,3.6vw,24px); line-height:1.5; }
+
+/* dark theme: keep text on white cards readable */
+body.underground .skill-card,body.underground .exp-card,body.underground .ach-card,
+body.underground .dialogue,body.underground .contact-form{ color:#0B0B0B; }
+body.underground .tagline,body.underground .world-header .sub{ color:#E5E7EB; }
+body.underground::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(2px 2px at 12% 18%,#fff,transparent),radial-gradient(2px 2px at 38% 62%,#fff,transparent),
+    radial-gradient(2px 2px at 71% 24%,#fff,transparent),radial-gradient(2px 2px at 88% 70%,#fff,transparent),
+    radial-gradient(2px 2px at 54% 36%,#9db7ff,transparent),radial-gradient(2px 2px at 24% 84%,#9db7ff,transparent);
+}
+
+/* scroll progress along the HUD */
+#progress{ position:fixed; top:calc(var(--hud-h) - 4px); left:0; height:4px; width:0; background:var(--mario-yellow); z-index:10000; }
+
+/* pixel hills behind the content */
+#hills{ position:fixed; left:0; right:0; bottom:calc(var(--ground-h) - 2px); height:140px; z-index:1; pointer-events:none; opacity:.9; }
+#hills i{ position:absolute; bottom:0; background:var(--mario-green); border:4px solid var(--ink); border-bottom:0;
+  clip-path:polygon(0 100%,18% 40%,28% 40%,38% 12%,62% 12%,72% 40%,82% 40%,100% 100%); }
+#hills i:nth-child(1){ left:4%; width:260px; height:110px; }
+#hills i:nth-child(2){ right:6%; width:340px; height:140px; background:var(--pipe-green-dk); }
+body.underground #hills{ opacity:.35; }
+
+/* title-screen drop-in: the one orchestrated motion moment */
+.logo{ animation:titleDrop .9s steps(8) both; }
+@keyframes titleDrop{ from{ transform:translateY(-70vh); } 60%{ transform:translateY(8px); } to{ transform:none; } }
+.tagline{ background:#000; color:#FFF; padding:8px 14px; border:3px solid #FFF; box-shadow:4px 4px 0 var(--shadow-hard); }
+body.underground .tagline{ color:#FFF; }
+
+/* player stats row */
+.stats{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+.stat{ background:#000; color:#FFF; border:3px solid #FFF; box-shadow:4px 4px 0 var(--shadow-hard); padding:8px 12px; min-width:104px; }
+.stat b{ display:block; font-family:var(--font-head); font-weight:400; font-size:18px; color:var(--mario-yellow); }
+.stat span{ font-size:18px; }
+
+/* richer cards */
+.project-card{ transition:transform .15s steps(3),box-shadow .15s steps(3); }
+.project-card:hover{ transform:translate(-4px,-10px); box-shadow:10px 14px 0 var(--shadow-hard); }
+.project-card::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:8px; background:repeating-linear-gradient(90deg,#C7A200 0 8px,var(--ink) 8px 10px); }
+.project-body{ padding-bottom:24px; }
+.xp-fill{ box-shadow:inset 0 4px 0 rgba(255,255,255,.35); }
+.xp-track[data-max="1"] .xp-fill{ background:var(--mario-yellow); }
+.skill-card:hover .skill-powerup{ animation:bump .3s steps(3); }
+
+/* castle details */
+.castle .battle{ position:absolute; left:-4px; right:-4px; top:-22px; height:18px;
+  background:repeating-linear-gradient(90deg,var(--mario-brown) 0 24px,transparent 24px 40px);
+  border-top:4px solid var(--ink); }
+.castle .pole{ position:absolute; left:50%; top:-84px; width:4px; height:62px; margin-left:-2px; background:var(--ink); z-index:0; }
+.castle .pole::after{ content:""; position:absolute; left:4px; top:0; width:28px; height:18px; background:var(--mario-green); border:3px solid var(--ink); }
+.castle::before{ display:none; }
+
+/* form feedback */
+.field.invalid input,.field.invalid textarea{ border-color:var(--mario-red); background:#2a0000; }
+.field .err{ display:none; color:var(--mario-red); font-size:18px; margin-top:4px; }
+.field.invalid .err{ display:block; }
+#form-status{ font-family:var(--font-head); font-size:10px; margin-top:14px; line-height:1.6; min-height:16px; }
+
+/* toast */
+#toast{ position:fixed; left:50%; top:calc(var(--hud-h) + 20px); transform:translateX(-50%) translateY(-160px); visibility:hidden; z-index:10001;
+  background:var(--mario-yellow); color:#000; border:4px solid #000; box-shadow:6px 6px 0 var(--shadow-hard);
+  font-family:var(--font-head); font-size:12px; padding:12px 16px; transition:transform .25s steps(4); }
+#toast.on{ transform:translateX(-50%) translateY(0); visibility:visible; }
+.float-pts{ position:fixed; z-index:60; pointer-events:none; font-family:var(--font-head); font-size:10px; color:#FFF; text-shadow:2px 2px 0 #000; animation:coinFly .7s ease-out forwards; }
+
+@media (max-width:640px){
+  #nav-menu{ display:flex; flex-wrap:nowrap; overflow-x:auto; left:4px; right:4px; bottom:calc(var(--ground-h) + 6px); }
+  #nav-menu button{ white-space:nowrap; flex:0 0 auto; }
+  #hud-controls{ flex-direction:row; }
+  .hud-btn{ padding:6px 8px; }
+  #hills{ display:none; }
+  .stat{ min-width:88px; }
+}
+@media (prefers-reduced-motion: reduce){
+  .logo,.skill-card:hover .skill-powerup{ animation:none; }
+  html{ scroll-behavior:auto; }
+}
+
+/* ===================== MARIO + BOTTOM NAV ===================== */
+/* Nav now lives INSIDE the brick ground bar, so Mario stands clear above it */
+#nav-menu{
+  position:fixed; left:50%; right:auto; bottom:14px; transform:translateX(-50%);
+  z-index:50; flex-wrap:nowrap; overflow-x:auto; max-width:calc(100vw - 16px);
+  background:#000; border:3px solid #FFF; padding:6px; gap:6px;
+  scrollbar-width:none;
+}
+#nav-menu::-webkit-scrollbar{ display:none; }
+#nav-menu button{ white-space:nowrap; flex:0 0 auto; }
+
+/* real-style pixel Mario (SVG sprite, drawn in JS) */
+#runner{ bottom:calc(var(--ground-h) - 2px); width:48px; height:45px; transition:left .12s linear; z-index:6; }
+#runner::after{ content:""; position:absolute; left:6px; right:6px; bottom:-3px; height:4px; background:rgba(0,0,0,.35); }
+#runner .sprite{
+  width:48px; height:45px; background:none !important; position:relative;
+  transform-origin:50% 50%; image-rendering:pixelated;
+}
+#runner .sprite::before{ display:none !important; }
+#runner .sprite.animate-run{ animation:none !important; }
+#runner .sprite svg{ display:block; position:absolute; inset:0; }
+#runner.hop{ animation:marioHop .45s cubic-bezier(.3,.7,.4,1); }
+@keyframes marioHop{ 0%,100%{ translate:0 0; } 45%{ translate:0 -84px; } }
+@media (prefers-reduced-motion: reduce){ #runner.hop{ animation:none; } }
+
+@media (max-width:640px){
+  #nav-menu{ left:4px; right:4px; transform:none; bottom:10px; max-width:none; }
+  #runner{ transform:scale(.8); transform-origin:bottom left; }
+}
+#contact .castle{ margin-top:104px; }
+
+/* ===================== SKILL ICONS ===================== */
+.skill-powerup{ background:none !important; border:0 !important; box-shadow:none !important; width:48px; height:48px; flex:0 0 48px; }
+.skill-powerup::before,.skill-powerup::after{ display:none !important; }
+.skill-powerup svg{ display:block; filter:drop-shadow(3px 3px 0 rgba(0,0,0,.85)); }
+.xp-text{ font-size:10px; text-shadow:1px 0 #000,-1px 0 #000,0 1px #000,0 -1px #000,1px 1px #000,-1px -1px #000; }
+</style>
+</head>
+<body>
+
+<!-- ===== HUD ===== -->
+<header id="hud" role="banner" aria-label="Game HUD">
+  <div class="hud-cell"><span class="hud-label">PLAYER</span><span class="hud-val" id="hud-player">MARIO</span></div>
+  <div class="hud-cell hud-center"><span class="hud-label">SCORE</span><span class="hud-val" id="hud-score">000000</span></div>
+  <div class="hud-cell"><span class="hud-label"><span class="coin-icon" aria-hidden="true"></span>COINS</span><span class="hud-val" id="hud-coins">x00</span></div>
+  <div class="hud-cell hud-center"><span class="hud-label">WORLD</span><span class="hud-val" id="hud-world">1-1</span></div>
+  <div class="hud-cell hud-right"><span class="hud-label">TIME</span><span class="hud-val" id="hud-time">400</span></div>
+</header>
+
+<!-- HUD controls (mute + theme) -->
+<div id="hud-controls">
+  <button id="btn-mute" class="hud-btn" aria-pressed="false" aria-label="Toggle sound">SOUND: ON</button>
+  <button id="btn-theme" class="hud-btn" aria-pressed="false" aria-label="Toggle underground theme">THEME</button>
+</div>
+
+<!-- ===== drifting clouds ===== -->
+<div class="cloud-layer" id="cloud-layer" aria-hidden="true"></div>
+
+<!-- ===== Mario runner ===== -->
+<div id="runner" aria-hidden="true"><div class="sprite"></div></div>
+
+<!-- ===== STAR POWER overlay (Konami) ===== -->
+<div id="star-power" aria-hidden="true"></div>
+
+<!-- ===== sticky nav menu ===== -->
+<nav id="nav-menu" aria-label="Section navigation">
+  <button data-target="title-screen">1-1 START</button>
+  <button data-target="about">1-2 ABOUT</button>
+  <button data-target="skills">1-3 SKILLS</button>
+  <button data-target="projects">1-4 PROJECTS</button>
+  <button data-target="experience">1-5 EXPERIENCE</button>
+  <button data-target="achievements">1-6 AWARDS</button>
+  <button data-target="contact">1-7 CONTACT</button>
+</nav>
+
+<!-- ===== ground ===== -->
+<div id="hills" aria-hidden="true"><i></i><i></i></div>
+<div id="ground" aria-hidden="true"></div>
+<div id="progress" aria-hidden="true"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<main>
+
+<!-- ============== WORLD 1-1: TITLE SCREEN ============== -->
+<section id="title-screen" class="world" aria-label="Title screen">
+  <h1 class="logo"><span id="hero-name">MARIO</span><span class="sub" id="hero-title">AI &amp; ML ENGINEER</span></h1>
+  <p class="tagline" id="hero-tagline">Training models, collecting coins, defeating bugs.</p>
+  <button class="press-start" id="press-start" aria-label="Press Start — scroll to About">PRESS START</button>
+  <div class="stats" id="stats" aria-label="Player stats"></div>
+  <div class="hero-deco">
+    <button class="q-block" data-coin aria-label="Question block — click for a coin"></button>
+    <button class="q-block" data-coin aria-label="Question block — click for a coin"></button>
+    <button class="q-block" data-coin aria-label="Question block — click for a coin"></button>
+  </div>
+</section>
+
+<!-- ============== WORLD 1-2: ABOUT ============== -->
+<section id="about" class="world" aria-label="About me">
+  <div class="pipe-divider"><div class="pipe" aria-hidden="true"></div></div>
+  <div class="world-header"><h2>WORLD 1-2 — ABOUT</h2><div class="sub" id="about-name-sub">Meet the player.</div></div>
+  <div class="dialogue" role="figure" aria-label="Toad dialogue">
+    <div class="toad" aria-hidden="true"></div>
+    <div class="dialogue-text">
+      <div class="dialogue-name" id="dialogue-name">TOAD</div>
+      <div class="typewriter" id="dialogue-body"><span class="cursor" aria-hidden="true"></span></div>
+    </div>
+    <div class="dialogue-caret" aria-hidden="true"></div>
+  </div>
+</section>
+
+<!-- ============== WORLD 1-3: SKILLS ============== -->
+<section id="skills" class="world" aria-label="Skills">
+  <div class="pipe-divider"><div class="pipe" aria-hidden="true"></div></div>
+  <div class="world-header"><h2>WORLD 1-3 — POWER-UPS</h2><div class="sub">Skills collected along the journey.</div></div>
+  <div id="skills-grid" role="list"></div>
+</section>
+
+<!-- ============== WORLD 1-4: PROJECTS ============== -->
+<section id="projects" class="world" aria-label="Projects">
+  <div class="pipe-divider"><div class="pipe" aria-hidden="true"></div></div>
+  <div class="world-header"><h2>WORLD 1-4 — LEVELS</h2><div class="sub">Pick a level to play.</div></div>
+  <div id="projects-grid" role="list"></div>
+</section>
+
+<!-- ============== WORLD 1-5: EXPERIENCE ============== -->
+<section id="experience" class="world" aria-label="Experience">
+  <div class="pipe-divider"><div class="pipe" aria-hidden="true"></div></div>
+  <div class="world-header"><h2>WORLD 1-5 — CHECKPOINTS</h2><div class="sub">Each flag = one stage cleared.</div></div>
+  <div id="experience-track" role="list"></div>
+</section>
+
+<!-- ============== WORLD 1-6: ACHIEVEMENTS ============== -->
+<section id="achievements" class="world" aria-label="Achievements">
+  <div class="pipe-divider"><div class="pipe" aria-hidden="true"></div></div>
+  <div class="world-header"><h2>WORLD 1-6 — COLLECTIBLES</h2><div class="sub">Stars, trophies &amp; certifications.</div></div>
+  <div id="achievements-grid" role="list"></div>
+</section>
+
+<!-- ============== WORLD 1-7: CONTACT ============== -->
+<section id="contact" class="world" aria-label="Contact">
+  <div class="pipe-divider"><div class="pipe" aria-hidden="true"></div></div>
+  <div class="world-header"><h2>WORLD 1-7 — FINAL CASTLE</h2><div class="sub">Drop a 1-UP message.</div></div>
+  <div class="castle" aria-hidden="true"><span class="battle"></span><span class="pole"></span></div>
+
+  <div class="social-row" id="social-row"></div>
+
+  <form class="contact-form" id="contact-form" novalidate>
+    <div class="field">
+      <label for="cf-name">PLAYER NAME</label>
+      <input id="cf-name" name="name" type="text" autocomplete="name" required placeholder="MARIO" />
+      <div class="err">Enter your name.</div>
+    </div>
+    <div class="field">
+      <label for="cf-email">EMAIL</label>
+      <input id="cf-email" name="email" type="email" autocomplete="email" required placeholder="player@castle.com" />
+      <div class="err">Enter a valid email address.</div>
+    </div>
+    <div class="field">
+      <label for="cf-msg">MESSAGE</label>
+      <textarea id="cf-msg" name="message" rows="4" required placeholder="Your message..."></textarea>
+      <div class="err">Write a short message.</div>
+    </div>
+    <button type="submit" class="btn-submit">SEND 1-UP</button>
+    <div id="form-status" role="status" aria-live="polite"></div>
+  </form>
+
+  <p class="contact-finale" id="contact-finale">THANK YOU! BUT THE REAL TREASURE IS WORKING TOGETHER. LET'S TALK!</p>
+</section>
+
+</main>
+
+<!-- ===== GAME OVER / CONTINUE footer ===== -->
+<footer id="gameover" role="contentinfo" aria-label="Game over footer">
+  <div class="gameover-title">GAME OVER</div>
+  <div class="gameover-sub">CONTINUE?</div>
+  <button class="btn-continue" id="btn-back" aria-label="Back to Start">▶ BACK TO START</button>
+  <div style="margin-top:24px; font-family:var(--font-head); font-size:9px; color:#FFF;">
+    © <span id="footer-year"></span> <span id="footer-name">MARIO</span> · BUILT WITH ❤ &amp; 8-BIT PIXELS
+  </div>
+</footer>
+
+<!-- ============================================================================
+     SCRIPT  — DATA-DRIVEN CONTENT + INTERACTIONS
+     ========================================================================== -->
+<script>
+/* ==========================================================================
+   EDIT YOUR CONTENT HERE
+   ==========================================================================
+   The five blocks below (PROFILE / SKILLS / PROJECTS / EXPERIENCE /
+   ACHIEVEMENTS) drive the entire portfolio. Change any value and the
+   page re-renders automatically. Adding an item to an array is the ONLY
+   step needed — World numbers, layout, animations and HUD all adapt.
+   ========================================================================== */
+
+const PROFILE = {
+  name:     "Zain Ul Abidin",
+  title:    " Gen AI & ML Engineer",
+  tagline:  "Training models, collecting coins, defeating bugs.",
+  bio:      "Hi! I'm an AI & ML engineer who loves shipping models that actually work in production. I build RAG systems, computer-vision pipelines and forecasting dashboards — and I treat every bug like a Goomba waiting to be stomped. Let's level up together.",
+  location: "Kasur, Pakistan",
+  email:    "fiverrzain03@gmail.com",
+  github:   "https://github.com/zainulabidinrubani",
+  linkedin: "https://www.linkedin.com/in/zain-ul-abidin-rubani"
+};
+
+const SKILLS = [
+  { name: "Python",         level: 80, icon: "mushroom"   },
+  { name: "TensorFlow",     level: 82, icon: "fireflower" },
+  { name: "Scikit-learn",   level: 88, icon: "coin"       },
+  { name: "LLMs & RAG",     level: 85, icon: "star"       },
+  { name: "Computer Vision",level: 50, icon: "fireflower" },
+  { name: "NLP",            level: 60, icon: "mushroom"   }
+];
+
+const PROJECTS = [
+  {
+    title: "Leave  Agent",
+    description: "LLM-powered chatbot agent that check leaves blanance of employee and send email to Manger and update the leave balance .",
+    tech: ["Python", "LangChain", "FASTAPI", "GROQ", "SUPABASE"],
+    demoUrl: "https://leaveagent-kbgi8x2x0-ai-3a7e.vercel.app/",
+    codeUrl: "https://github.com/zainulabidinrubani/Leave-Agent"
+  },
+  {
+    title: "Movie recomandation engine with Chatbot",
+    description: "LLM-powerd what answers movies related queries and find movie with discription and movie recommendation system using NLP",
+    tech: ["NLP", "Langchain", "Groq", "Serper", "TMDB"],
+    demoUrl: "https://movie-dekh.onrender.com/",
+    codeUrl: "https://github.com/zainulabidinrubani/Movie_dekh"
+  },
+  {
+    title: "Helmet Detection",
+    description: "Deep learning model that detects helmet in images and with webcam using OpenCV  .",
+    tech: ["Scikit-learn", "OpenCV", "python", "MobileNetV3"],
+    demoUrl: "https://www.linkedin.com/feed/update/urn:li:activity:7505450916201021440/",
+    codeUrl: "https://github.com/zainulabidinrubani/Helemet_detection"
+  },
+  {
+    title: "Resturant RAG Chatbot",
+    description: "RAG base chatbot that give returant informations and helps for menu selection",
+    tech: ["RAg", "Langchain", "FastAPI", "Python"],
+    demoUrl: "",
+    codeUrl: "https://github.com/zainulabidinrubani/Brim-Burgers"
+  }
+];
+
+const EXPERIENCE = [
+  {
+    role: "Gen Ai/ML Engineer as Internee",
+    company: "ECS",
+    period: "2026 — Present",
+    details: "Makeing real world projects on RAGs and Ai Agents "
+  }
+];
+
+const ACHIEVEMENTS = [
+  { title: "Ai Engineer",      type: "certification", year: "2026" },
+  { title: "C++",   type: "certification",        year: "2025" },
+  { title: "Ai prompt Engineering",      type: "certification",  year: "2025" }
+];
+
+/* ==========================================================================
+   END OF CONTENT BLOCK — everything below is rendering logic.
+   You usually don't need to edit it.
+   ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+   tiny helpers
+   ---------------------------------------------------------------------------- */
+const $  = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const pad = (n, w=6) => String(n).padStart(w, "0");
+const WORLD_OF = (idx) => `1-${idx + 1}`;   // 0 -> "1-1"
+
+/* ----------------------------------------------------------------------------
+   Web Audio — coin / stomp / star sounds (no audio files)
+   ---------------------------------------------------------------------------- */
+const Audio8 = (() => {
+  let ctx = null, muted = false;
+  const ensure = () => { if(!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); if(ctx.state==="suspended") ctx.resume(); return ctx; };
+  const tone = (freq, dur=0.12, type="square", vol=0.15, when=0) => {
+    if(muted) return;
+    const c = ensure();
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.value = vol;
+    o.connect(g); g.connect(c.destination);
+    const t = c.currentTime + when;
+    o.start(t); o.stop(t + dur);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  };
+  return {
+    coin(){  tone(988, .08, "square", .14); tone(1319, .12, "square", .14, .07); },
+    stomp(){ tone(392, .10, "square", .18); },
+    jump(){  tone(523, .07, "square", .12); tone(784, .10, "square", .12, .06); },
+    star(){
+      [523,659,784,1047,1319,1568].forEach((f,i)=>tone(f, .09, "square", .14, i*0.08));
+    },
+    setMuted(m){ muted = m; },
+    isMuted(){ return muted; }
+  };
+})();
+
+/* ----------------------------------------------------------------------------
+   HUD state — score (scroll), coins, world, time countdown
+   ---------------------------------------------------------------------------- */
+const HUD = {
+  score:0, bonus:0, coins:0, world:"1-1", time:400,
+  els:{},
+  init(){
+    this.els.player = $("#hud-player");
+    this.els.score  = $("#hud-score");
+    this.els.coins  = $("#hud-coins");
+    this.els.world  = $("#hud-world");
+    this.els.time   = $("#hud-time");
+    this.els.player.textContent = (PROFILE.name || "MARIO").toUpperCase();
+    this.render();
+  },
+  addScore(n){ this.bonus = Math.max(0, this.bonus + n); this.render(); },
+  addCoin(){ this.coins += 1; this.addScore(200); Audio8.coin(); this.render(); if(this.coins % 10 === 0) toast("1-UP! 10 COINS COLLECTED"); },
+  setWorld(w){ this.world = w; this.render(); },
+  tick(){ if(this.time>0){ this.time -= 1; this.render(); } },
+  render(){
+    this.els.score.textContent = pad(this.score + this.bonus);
+    this.els.coins.textContent = "x" + String(this.coins).padStart(2, "0");
+    this.els.world.textContent = this.world;
+    this.els.time.textContent  = String(this.time).padStart(3, "0");
+  }
+};
+
+function toast(msg){
+  const t = $("#toast"); t.textContent = msg; t.classList.add("on");
+  clearTimeout(window.__toast); window.__toast = setTimeout(() => t.classList.remove("on"), 2200);
+}
+function renderStats(){
+  const items = [[PROJECTS.length,"LEVELS"],[SKILLS.length,"POWER-UPS"],[EXPERIENCE.length,"CHECKPOINTS"],[ACHIEVEMENTS.length,"STARS"]];
+  $("#stats").innerHTML = items.map(([n,l]) => `<div class="stat"><b>${n}</b><span>${l}</span></div>`).join("");
+}
+
+/* ----------------------------------------------------------------------------
+   Profile wiring (hero + about + footer + social)
+   ---------------------------------------------------------------------------- */
+function applyProfile(){
+  const hero = $("#hero-name");         hero.textContent   = PROFILE.name.toUpperCase();
+  const heroTitle = $("#hero-title");    heroTitle.textContent = PROFILE.title.toUpperCase();
+  const tagline = $("#hero-tagline");   tagline.textContent = PROFILE.tagline;
+  $("#dialogue-name").textContent = (PROFILE.name.split(" ")[0] || "PLAYER").toUpperCase() + " — OVERVIEW";
+  $("#about-name-sub").textContent = `${PROFILE.name} — ${PROFILE.location}`;
+  $("#footer-year").textContent = new Date().getFullYear();
+  $("#footer-name").textContent = PROFILE.name.toUpperCase();
+
+  // social links
+  const social = $("#social-row");
+  social.innerHTML = "";
+  const items = [
+    { label: "EMAIL",    href:`mailto:${PROFILE.email}`,  icon:"✉" },
+    { label: "GITHUB",   href:PROFILE.github,            icon:"GH" },
+    { label: "LINKEDIN", href:PROFILE.linkedin,          icon:"IN" },
+    { label: "LOCATION", href:`https://www.google.com/maps/search/${encodeURIComponent(PROFILE.location)}`, icon:"◉" }
+  ];
+  items.forEach(it => {
+    const a = document.createElement("a");
+    a.className = "social-link";
+    a.href = it.href;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.setAttribute("aria-label", `${it.label} link`);
+    a.innerHTML = `<span aria-hidden="true">${it.icon}</span><span>${it.label}</span>`;
+    social.appendChild(a);
+  });
+}
+
+/* ----------------------------------------------------------------------------
+   Typewriter — Toad dialogue
+   ---------------------------------------------------------------------------- */
+function typewrite(el, text, speed=18){
+  return new Promise(resolve => {
+    el.textContent = "";
+    let i = 0;
+    const cursor = document.createElement("span");
+    cursor.className = "cursor"; cursor.setAttribute("aria-hidden","true");
+    el.appendChild(cursor);
+    const tick = () => {
+      if(i < text.length){
+        cursor.insertAdjacentText("beforebegin", text[i]);
+        i++;
+        setTimeout(tick, speed);
+      } else {
+        resolve();
+      }
+    };
+    tick();
+  });
+}
+
+/* ----------------------------------------------------------------------------
+   Render SKILLS — power-up cards + XP bars (fill on scroll into view)
+   ---------------------------------------------------------------------------- */
+const ICON_PAL = { K:"#000000", R:"#E52521", W:"#FFFFFF", T:"#FFD9A8", Y:"#FBD000", O:"#C7A200", G:"#2E9E32" };
+const SKILL_ICONS_MAP = {
+  mushroom: [
+    ".....KKKKKK.....","...KKRRWWRRKK...","..KRRWWWWRRRRK..",".KRWWWWWRRWWWRK.",
+    ".KWWWWWWRRWWWWK.","KRWWWWRRRRRWWWRK","KRRWWRRRRRRRWWRK","KRRRRRRRRRRRRRRK",
+    "KKKKKKKKKKKKKKKK",".KKTTTTTTTTTTKK.","..KTTKTTTTKTTK..","..KTTKTTTTKTTK..",
+    "..KTTTTTTTTTTK..","...KKTTTTTTKK...","....KKKKKKKK....","................"],
+  fireflower: [
+    "......KKKK......","....KKRRRRKK....","...KRRYYYYRRK...","..KRRYWWWWYRRK..",
+    "..KRYWWKKWWYRK..","..KRYWWKKWWYRK..","..KRRYWWWWYRRK..","...KRRYYYYRRK...",
+    "....KKRRRRKK....","......KGGK......",".KKK..KGGK..KKK.","KGGGK.KGGK.KGGGK",
+    ".KGGGKKGGKKGGGK.","..KKGGGGGGGGKK..","....KKGGGGKK....",".....KKKKKK....."],
+  star: [
+    ".......KK.......","......KYYK......","......KYYK......",".....KYYYYK.....",
+    "KKKKKKYYYYKKKKKK","KYYYYYYYYYYYYYYK",".KYYYYYYYYYYYYK.","..KYYYKYYKYYYK..",
+    "...KYYKYYKYYK...","...KYYYYYYYYK...","..KYYYYYYYYYYK..","..KYYYKKKKYYYK..",
+    ".KYYYKK..KKYYYK.",".KYYKK....KKYYK.",".KKK........KKK.","................"],
+  coin: [
+    "....KKKKKKKK....","...KYYYYYYYYK...","..KYYWWYYYYOOK..","..KYWYYYYYYYOK..",
+    "..KYWYYOOYYYOK..","..KYWYYOOYYYOK..","..KYWYYOOYYYOK..","..KYYYYOOYYYOK..",
+    "..KYYYYOOYYYOK..","..KYYYYOOYYYOK..","..KYYYYOOYYYOK..","..KYYYYYYYYYOK..",
+    "..KYYYYYYYYOOK..","...KYYYYYYYYK...","....KKKKKKKK....","................"]
+};
+function pixelSVG(rows, pal, size){
+  let r = "";
+  rows.forEach((row, y) => {
+    let x = 0;
+    while(x < row.length){
+      const c = row[x];
+      if(c === "."){ x++; continue; }
+      let w = 1; while(row[x + w] === c) w++;
+      r += `<rect x="${x}" y="${y}" width="${w}" height="1" fill="${pal[c]}"/>`;
+      x += w;
+    }
+  });
+  return `<svg viewBox="0 0 16 16" width="${size}" height="${size}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
+}
+const SKILL_ICONS = Object.fromEntries(Object.entries(SKILL_ICONS_MAP).map(([k, rows]) => [k, pixelSVG(rows, ICON_PAL, 48)]));
+
+function renderSkills(){
+  const grid = $("#skills-grid");
+  grid.innerHTML = "";
+  SKILLS.forEach((s, idx) => {
+    const card = document.createElement("div");
+    card.className = "skill-card";
+    card.setAttribute("role", "listitem");
+    const names = Object.keys(SKILL_ICONS);
+    const icon = SKILL_ICONS[s.icon] ? s.icon : names[idx % names.length];   // fallback if icon missing/unknown
+    card.innerHTML = `
+      <div class="skill-powerup ${icon}" role="img"
+           aria-label="power-up: ${icon}">${SKILL_ICONS[icon]}</div>
+      <div class="skill-info">
+        <div class="skill-name">${s.name}</div>
+        <div class="xp-track" role="progressbar"
+             aria-label="${s.name} skill level ${s.level} of 100"
+             aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+          <div class="xp-fill" data-target="${s.level}"></div>
+          <div class="xp-text">${s.level}%</div>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  // observe each xp-fill — fill when in view
+  const io = new IntersectionObserver((entries) => {
+    let played = false;
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        const fill = e.target;
+        const lvl = parseInt(fill.dataset.target || "0", 10);
+        fill.style.width = lvl + "%";
+        fill.parentElement.setAttribute("aria-valuenow", String(lvl));
+        if(!played){ Audio8.stomp(); played = true; }
+        if(lvl >= 90) fill.parentElement.dataset.max = "1";
+        io.unobserve(fill);
+      }
+    });
+  }, { threshold: 0.4 });
+  $$(".xp-fill", grid).forEach(f => io.observe(f));
+}
+
+/* ----------------------------------------------------------------------------
+   Render PROJECTS — level tiles (auto-numbered World 1-4.N)
+   ---------------------------------------------------------------------------- */
+function renderProjects(){
+  const grid = $("#projects-grid");
+  grid.innerHTML = "";
+  PROJECTS.forEach((p, idx) => {
+    const lvl = `${idx + 1}-${1}`; // world-stage
+    const card = document.createElement("article");
+    card.className = "project-card";
+    card.setAttribute("role", "listitem");
+    card.innerHTML = `
+      <div class="project-level">
+        <span>WORLD 1-4 · LEVEL ${idx + 1}</span>
+        <span class="flag" aria-hidden="true"></span>
+      </div>
+      <div class="project-body">
+        <h3 class="project-title">${p.title}</h3>
+        <p class="project-desc">${p.description}</p>
+        <div class="project-tech">
+          ${p.tech.map(t => `<span class="tech-tag">${t}</span>`).join("")}
+        </div>
+        <div class="project-buttons">
+          <a class="btn-play" href="${p.demoUrl}" target="_blank" rel="noopener"
+             aria-label="Play demo for ${p.title}">▶ PLAY</a>
+          <a class="btn-code" href="${p.codeUrl}" target="_blank" rel="noopener"
+             aria-label="View code for ${p.title}">&lt;/&gt; CODE</a>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+/* ----------------------------------------------------------------------------
+   Render EXPERIENCE — timeline (auto-numbered checkpoints)
+   ---------------------------------------------------------------------------- */
+function renderExperience(){
+  const track = $("#experience-track");
+  track.innerHTML = "";
+  EXPERIENCE.forEach((e, idx) => {
+    const row = document.createElement("div");
+    row.className = "exp-row";
+    row.setAttribute("role", "listitem");
+    row.innerHTML = `
+      <div class="flag-pole" aria-hidden="true"></div>
+      <div class="exp-card">
+        <div class="exp-period">CHECKPOINT ${idx + 1} · ${e.period}</div>
+        <div class="exp-role">${e.role}</div>
+        <div class="exp-company">@ ${e.company}</div>
+        <p class="exp-details">${e.details}</p>
+      </div>`;
+    track.appendChild(row);
+  });
+}
+
+/* ----------------------------------------------------------------------------
+   Render ACHIEVEMENTS — collectibles
+   ---------------------------------------------------------------------------- */
+function renderAchievements(){
+  const grid = $("#achievements-grid");
+  grid.innerHTML = "";
+  ACHIEVEMENTS.forEach((a, idx) => {
+    let iconClass = "star", iconLabel = "star";
+    if(a.type === "certification"){ iconClass = "cert";   iconLabel = "certificate"; }
+    else if(a.type === "award"){    iconClass = "trophy"; iconLabel = "trophy"; }
+    else if(a.type === "publication"){ iconClass = "trophy"; iconLabel = "publication badge"; }
+
+    const card = document.createElement("div");
+    card.className = "ach-card";
+    card.setAttribute("role", "listitem");
+    card.innerHTML = `
+      <div class="ach-icon ${iconClass}" role="img" aria-label="${iconLabel}"></div>
+      <div class="ach-title">${a.title}</div>
+      <div class="ach-meta">${a.year}</div>
+      <div class="ach-type">${a.type.toUpperCase()}</div>`;
+    grid.appendChild(card);
+  });
+}
+
+/* ----------------------------------------------------------------------------
+   Drifting clouds (decorative)
+   ---------------------------------------------------------------------------- */
+function spawnClouds(){
+  const layer = $("#cloud-layer");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reduce) return;
+  const N = 6;
+  for(let i = 0; i < N; i++){
+    const c = document.createElement("div");
+    c.className = "cloud";
+    c.innerHTML = `<div class="c1"></div><div class="c2"></div><div class="c3"></div>`;
+    c.style.top   = (8 + Math.random() * 40) + "vh";
+    c.style.animationDuration = (45 + Math.random() * 40) + "s";
+    c.style.animationDelay    = (-Math.random() * 60) + "s";
+    c.style.scale = String(0.7 + Math.random() * 0.7);
+    layer.appendChild(c);
+  }
+}
+
+
+/* ----------------------------------------------------------------------------
+   Pixel Mario — 16x15 sprite, 3 frames (stand / run A / run B)
+   ---------------------------------------------------------------------------- */
+const MARIO_PAL = { R:"#E52521", O:"#2038EC", S:"#FFB070", H:"#6B3B0B", Y:"#FBD000" };
+const MARIO_TOP = [
+  "....RRRRR.......",
+  "...RRRRRRRRR....",
+  "...HHHSSHS......",
+  "..HSHSSSHSSS....",
+  "..HSHHSSSHSSS...",
+  "..HHSSSSHHHH....",
+  "....SSSSSSS.....",
+  "..RRRROORRRR....",
+  ".RRRROOOORRRR...",
+  ".SSROYOOYORSS...",
+  ".SSSOOOOOOSSS...",
+  ".SSOOOOOOOOSS..."
+];
+const MARIO_LEGS = [
+  ["...OOO..OOO.....","..HHHH..HHHH....",".HHHHH..HHHHH..."],   // stand
+  ["..OOO....OOO....",".HHHH......HHH..","HHHH........HHH."],   // run A
+  ["....OOOOOO......","...HHHHHHHH.....","...HHHHHHHH....."]    // run B
+];
+function marioSVG(legs){
+  const rows = MARIO_TOP.concat(legs);
+  let r = "";
+  rows.forEach((row, y) => {
+    let x = 0;
+    while(x < row.length){
+      const c = row[x];
+      if(c === "."){ x++; continue; }
+      let w = 1; while(row[x + w] === c) w++;
+      r += `<rect x="${x}" y="${y}" width="${w}" height="1" fill="${MARIO_PAL[c]}"/>`;
+      x += w;
+    }
+  });
+  return `<svg viewBox="0 0 16 15" width="48" height="45" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
+}
+const Mario = (() => {
+  let spr, frames = [], f = 0, timer = null, idle = null;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const show = (i) => frames.forEach((s, k) => s.style.display = (k === i ? "block" : "none"));
+  return {
+    init(){
+      spr = $("#runner .sprite");
+      spr.innerHTML = MARIO_LEGS.map(marioSVG).join("");
+      frames = $$("svg", spr);
+      show(0);
+    },
+    run(dir){
+      if(!spr) return;
+      if(dir) spr.style.transform = dir < 0 ? "scaleX(-1)" : "scaleX(1)";
+      if(!reduce && !timer){
+        f = 1; show(1);
+        timer = setInterval(() => { f = (f === 1 ? 2 : 1); show(f); }, 110);
+      }
+      clearTimeout(idle);
+      idle = setTimeout(() => { clearInterval(timer); timer = null; show(0); }, 220);
+    },
+    hop(){
+      const r = $("#runner");
+      r.classList.remove("hop"); void r.offsetWidth; r.classList.add("hop");
+      if(!reduce){ show(1); setTimeout(() => show(timer ? f : 0), 450); }
+      setTimeout(() => r.classList.remove("hop"), 480);
+    }
+  };
+})();
+
+/* ----------------------------------------------------------------------------
+   HUD: scroll -> score, current world
+   ---------------------------------------------------------------------------- */
+function setupScrollHUD(){
+  const sections = $$("section.world");
+  const onScroll = () => {
+    const y = window.scrollY + window.innerHeight / 3;
+    // score grows with scroll distance
+    HUD.score = Math.floor(y / 6); HUD.render();
+    $("#progress").style.width = (100 * window.scrollY / Math.max(1, document.body.scrollHeight - window.innerHeight)) + "%";
+    // current world
+    let cur = 0;
+    sections.forEach((s, i) => {
+      const top = s.getBoundingClientRect().top + window.scrollY;
+      if(y >= top) cur = i;
+    });
+    HUD.setWorld(WORLD_OF(cur));
+
+    // nav active state
+    $$("#nav-menu button").forEach(b => b.classList.toggle("active",
+      b.dataset.target === sections[cur].id));
+
+    // move Mario runner
+    const runner = $("#runner");
+    const progress = Math.min(1, window.scrollY / Math.max(1, document.body.scrollHeight - window.innerHeight));
+    const leftPct = 8 + progress * 80; // 8% -> 88%
+    runner.style.left = leftPct + "%";
+    const dy = window.scrollY - (window.__lastY ?? window.scrollY);
+    window.__lastY = window.scrollY;
+    if(dy !== 0) Mario.run(dy);
+  };
+  window.addEventListener("scroll", onScroll, { passive:true });
+  onScroll();
+}
+
+/* ----------------------------------------------------------------------------
+   Press Start + Nav buttons + Back to Start
+   ---------------------------------------------------------------------------- */
+function setupNav(){
+  $("#press-start").addEventListener("click", () => {
+    Audio8.jump(); Mario.hop();
+    $("#about").scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+  $$("#nav-menu button").forEach(b => {
+    b.addEventListener("click", () => {
+      const t = document.getElementById(b.dataset.target);
+      if(t) t.scrollIntoView({ behavior:"smooth", block:"start" });
+    });
+  });
+  $("#btn-back").addEventListener("click", () => {
+    window.scrollTo({ top:0, behavior:"smooth" });
+  });
+}
+
+/* ----------------------------------------------------------------------------
+   Question blocks — coin pop + sound + HUD coin
+   ---------------------------------------------------------------------------- */
+function setupQuestionBlocks(){
+  $$("[data-coin]").forEach(b => {
+    b.addEventListener("click", (e) => {
+      // bump
+      b.classList.remove("bump");
+      void b.offsetWidth;
+      b.classList.add("bump");
+      // spawn coin visual
+      const rect = b.getBoundingClientRect();
+      const coin = document.createElement("div");
+      coin.className = "coin-pop";
+      coin.style.left = (rect.left + rect.width/2 - 12) + "px";
+      coin.style.top  = (rect.top - 8) + "px";
+      coin.style.position = "fixed";
+      document.body.appendChild(coin);
+      setTimeout(() => coin.remove(), 700);
+      const pts = document.createElement("div"); pts.className = "float-pts"; pts.textContent = "+200";
+      pts.style.left = (rect.left + rect.width/2 - 16) + "px"; pts.style.top = (rect.top - 30) + "px";
+      document.body.appendChild(pts); setTimeout(() => pts.remove(), 700);
+      Mario.hop();
+      HUD.addCoin();
+    });
+  });
+}
+
+/* ----------------------------------------------------------------------------
+   Mute toggle
+   ---------------------------------------------------------------------------- */
+function setupMute(){
+  const btn = $("#btn-mute");
+  btn.addEventListener("click", () => {
+    const next = !Audio8.isMuted();
+    Audio8.setMuted(next);
+    btn.setAttribute("aria-pressed", String(next));
+    btn.textContent = next ? "SOUND: OFF" : "SOUND: ON";
+  });
+}
+
+/* ----------------------------------------------------------------------------
+   Underground theme toggle
+   ---------------------------------------------------------------------------- */
+function setupThemeToggle(){
+  const btn = $("#btn-theme");
+  btn.addEventListener("click", () => {
+    const on = document.body.classList.toggle("underground");
+    btn.setAttribute("aria-pressed", String(on));
+    Audio8.stomp();
+    try{ localStorage.setItem("theme", on ? "dark" : "light"); }catch(_){}
+  });
+  let saved = null; try{ saved = localStorage.getItem("theme"); }catch(_){}
+  if(saved === "dark"){ document.body.classList.add("underground"); btn.setAttribute("aria-pressed","true"); }
+}
+
+/* ----------------------------------------------------------------------------
+   Konami code -> star power
+   ---------------------------------------------------------------------------- */
+function setupKonami(){
+  const seq = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
+  let pos = 0;
+  window.addEventListener("keydown", (e) => {
+    const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    if(key === seq[pos]){
+      pos++;
+      if(pos === seq.length){
+        pos = 0;
+        triggerStarPower();
+      }
+    } else {
+      pos = (key === seq[0]) ? 1 : 0;
+    }
+  });
+}
+function triggerStarPower(){
+  const el = $("#star-power");
+  el.classList.add("on");
+  Audio8.star();
+  // also bump HUD
+  HUD.addScore(1000);
+  setTimeout(() => el.classList.remove("on"), 4000);
+}
+
+/* ----------------------------------------------------------------------------
+   Contact form (no backend — demo handler)
+   ---------------------------------------------------------------------------- */
+function setupContactForm(){
+  const form = $("#contact-form");
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name  = $("#cf-name").value.trim();
+    const email = $("#cf-email").value.trim();
+    const msg   = $("#cf-msg").value.trim();
+    const ok = { "cf-name":!!name, "cf-email":/^\S+@\S+\.\S+$/.test(email), "cf-msg":!!msg };
+    Object.entries(ok).forEach(([id,v]) => $("#"+id).closest(".field").classList.toggle("invalid", !v));
+    const status = $("#form-status");
+    if(!Object.values(ok).every(Boolean)){
+      status.textContent = "Fix the highlighted fields to send your message.";
+      Audio8.stomp(); return;
+    }
+    status.textContent = "Opening your email app...";
+    // Build a mailto link with the profile's email
+    const subject = encodeURIComponent(`Portfolio message from ${name}`);
+    const body    = encodeURIComponent(`${msg}\n\n— ${name} (${email})`);
+    window.location.href = `mailto:${PROFILE.email}?subject=${subject}&body=${body}`;
+    Audio8.jump();
+  });
+}
+
+/* ----------------------------------------------------------------------------
+   Boot
+   ---------------------------------------------------------------------------- */
+document.addEventListener("DOMContentLoaded", () => {
+  applyProfile();
+  Mario.init();
+  renderSkills();
+  renderProjects();
+  renderExperience();
+  renderAchievements();
+  renderStats();
+  spawnClouds();
+  HUD.init();
+  setupScrollHUD();
+  setupNav();
+  setupQuestionBlocks();
+  setupMute();
+  setupThemeToggle();
+  setupKonami();
+  setupContactForm();
+
+  // time countdown
+  setInterval(() => HUD.tick(), 1000);
+
+  // typewriter dialogue (starts when about section enters)
+  const about = $("#about");
+  const io = new IntersectionObserver(async (entries) => {
+    entries.forEach(async (e) => {
+      if(e.isIntersecting){
+        const body = $("#dialogue-body");
+        if(!body.dataset.done){
+          body.dataset.done = "1";
+          body.setAttribute("aria-label", PROFILE.bio || "");
+          if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) body.textContent = PROFILE.bio || "";
+          else await typewrite(body, PROFILE.bio || "", 16);
+        }
+      }
+    });
+  }, { threshold: 0.4 });
+  io.observe(about);
+});
+</script>
+</body>
+</html>
